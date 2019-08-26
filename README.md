@@ -8,27 +8,27 @@ Hamster Wheel is a .NET Core service that use Yoctopuce devices to compute and d
 This app is compatible with .NET Core 2.1. You can build the project using Visual Studio or the ''dotnet'' command.
 
 The command line to debug the application:
-```
-dotnet run
+```shell
+c:\Yoctopuce Hamster Wheel> dotnet run
 ```
 
 ## Install it on a Raspberry Pi
 
 The command line to build a self contained application that can un on Raspberry Pi (Pi2, Pi3 or Pi4):
-```
-dotnet publish -o hamster_wheel_pi  --self-contained -r linux-arm
+```shell
+c:\Yoctopuce Hamster Wheel> dotnet publish -o hamster_wheel_pi  --self-contained -r linux-arm
 ```
 
 This command create a ``hamster_wheel_pi`` directory with all the required files (including the .Net virtual machine). You must then copy this folder on the Raspberry Pi and set the execution flags to the ``HamsterWeel`` file inside this directory:
-```
-chmod +x HamsterWheel
+```shell
+pi@raspberrypi:~/hamster_wheel_pi $ chmod +x HamsterWheel
 ```
 
 ## Install it as a service
 
 Create a file named ``hamsterwheel.service`` in the ``/etc/systemd/system/`` directory with the following content:
 
-```
+```ini
 [Unit]
 Description=Yoctopuce Hamster Wheel
 [Service]
@@ -42,8 +42,8 @@ WantedBy=multi-user.target
 
 Then you need to enable the service and start it:
 
-```
-sudo systemctl enable hamsterwheel.service
-sudo systemctl start hamsterwheel.service
+```shell
+pi@raspberrypi:~/hamster_wheel_pi $ sudo systemctl enable hamsterwheel.service
+pi@raspberrypi:~/hamster_wheel_pi $ sudo systemctl start hamsterwheel.service
 ```
 
