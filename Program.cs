@@ -21,7 +21,6 @@ namespace Yoctopuce_Hamster_Wheel
             uint initactivityDelay = 10;
 
             for (int i = 0; i < args.Length; i++) {
-                Console.WriteLine(args[i]);
                 if (i + 1 >= args.Length) {
                     Console.Error.WriteLine("missing argument for " + args[i]);
                     printUsage();
