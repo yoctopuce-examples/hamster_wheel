@@ -169,8 +169,7 @@ namespace Yoctopuce_Hamster_Wheel
 
             long deltaCount;
             if (_lastCount > count) {
-                //Fixme: handle wrap
-                deltaCount = count;
+                deltaCount = count + 999999 - _lastCount;
             } else {
                 deltaCount = (count - _lastCount);
             }
