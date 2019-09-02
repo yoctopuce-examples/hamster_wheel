@@ -11,9 +11,10 @@ namespace Yoctopuce_Hamster_Wheel
         private int _h;
         private YDisplayLayer _fgLayer;
         private YDisplayLayer _bgLayer;
+        private bool _useImperial;
 
 
-        public HamsterScreen(string hwid)
+        public HamsterScreen(string hwid, bool useImperial)
         {
             if (hwid == "") {
                 _display = YDisplay.FirstDisplay();
@@ -27,6 +28,7 @@ namespace Yoctopuce_Hamster_Wheel
                 }
             }
 
+            _useImperial = useImperial;
             _display.resetAll();
             _w = _display.get_displayWidth();
             _h = _display.get_displayHeight();
@@ -74,7 +76,15 @@ namespace Yoctopuce_Hamster_Wheel
 
         public void DisplaySpeed(string label1, string label2, double speed)
         {
-            DisplaySingleValue(label1, label2, String.Format("{0:0.0} km/h", speed));
+            string unit;
+            if (_useImperial) {
+                unit = "mph";
+                speed = speed * 0.62137;
+            } else {
+                unit = "km/h";
+            }
+
+            DisplaySingleValue(label1, label2, String.Format("{0:0.0} {1}", speed, unit));
         }
 
         private void DisplaySingleValue(string label, string labe2, string value)
@@ -98,14 +108,22 @@ namespace Yoctopuce_Hamster_Wheel
 
         public void DisplayDistance(string label, string dur, double currentdistance)
         {
-            DisplaySingleValue(label, dur, String.Format("{0:0.0} m", currentdistance));
+            string unit;
+            if (_useImperial) {
+                unit = "in";
+                currentdistance = currentdistance * 39.37008;
+            } else {
+                unit = "m";
+            }
+
+            DisplaySingleValue(label, dur, String.Format("{0:0.0} {1}", currentdistance,unit));
         }
 
         public void DisplayDuration(string label, string dur, double currentdurationS)
         {
             TimeSpan time = TimeSpan.FromSeconds(currentdurationS);
             string str = time.ToString(@"hh\:mm\:ss");
-            DisplaySingleValue(label,dur, str);
+            DisplaySingleValue(label, dur, str);
         }
     }
 

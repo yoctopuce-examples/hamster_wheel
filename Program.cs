@@ -59,7 +59,7 @@ namespace Yoctopuce_Hamster_Wheel
                         csvfile = args[i + 1];
                         break;
                     case "--unit":
-                        if (args[i + 1] == "imperial") {
+                        if (args[i + 1].ToLower() == "imperial") {
                             useImperial = true;
                         }
                         break;

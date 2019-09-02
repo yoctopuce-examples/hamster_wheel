@@ -43,7 +43,7 @@ namespace Yoctopuce_Hamster_Wheel
 
         private DisplayMode _mode = DisplayMode.AVG_SPEED;
         private DisplayDuration _displayDuration = DisplayDuration.LAST;
-        private bool _useMiles = false;
+        private bool _useImperial = false;
         private double _currentSpeed = 0;
         private HamsterRun _currenRun;
         private uint _inactivityS;
@@ -54,7 +54,7 @@ namespace Yoctopuce_Hamster_Wheel
         private HamsterButton _hamsterDurButton;
         private HamsterButton _hamsterResetButton;
 
-        public HamsterController(string url, string pwmHwId, string displayHwId, string nextButtonHwId, string prevButtonHwId, string durButtonHwId, string resetButtonHwId, uint diameterMM, uint inactivityS, string csvfile, bool useMiles)
+        public HamsterController(string url, string pwmHwId, string displayHwId, string nextButtonHwId, string prevButtonHwId, string durButtonHwId, string resetButtonHwId, uint diameterMM, uint inactivityS, string csvfile, bool useImperial)
         {
             _url = url;
             _nextButtonHwId = nextButtonHwId;
@@ -66,7 +66,7 @@ namespace Yoctopuce_Hamster_Wheel
             _currenRun = new HamsterRun();
             _diameterMM = diameterMM;
             _inactivityS = inactivityS;
-            _useMiles = useMiles;
+            _useImperial = useImperial;
             _lastRun = new HamsterRun();
             _todayRun = new HamsterRun();
             _totalRun = new HamsterRun();
@@ -91,30 +91,30 @@ namespace Yoctopuce_Hamster_Wheel
 
             try {
                 _hamsterNextButton = new HamsterButton(_nextButtonHwId, nextButtonPressed);
-            } catch (Exception ex) {
+            } catch (Exception) {
                 Console.Error.WriteLine(String.Format("No button named \"{0}\" found. Disable \"next\" button.", _nextButtonHwId));
             }
 
             try {
                 _hamsterPrevButton = new HamsterButton(_prevButtonHwId, prevButtonPressed);
-            } catch (Exception ex) {
-                Console.Error.WriteLine(String.Format("No button named \"{0}\" found. Disable \"prev\" button.",_prevButtonHwId));
+            } catch (Exception) {
+                Console.Error.WriteLine(String.Format("No button named \"{0}\" found. Disable \"prev\" button.", _prevButtonHwId));
             }
 
             try {
                 _hamsterDurButton = new HamsterButton(_durButtonHwId, durButtonPressed);
-            } catch (Exception ex) {
+            } catch (Exception) {
                 Console.Error.WriteLine(String.Format("No button named \"{0}\" found. Disable \"duration\" button.", _durButtonHwId));
             }
 
             try {
                 _hamsterResetButton = new HamsterButton(_resetButtonHwId, resetButtonPressed);
-            } catch (Exception ex) {
+            } catch (Exception) {
                 Console.Error.WriteLine(String.Format("No button named \"{0}\" found. Disable \"reset\" button.", _resetButtonHwId));
             }
 
             try {
-                _hamsterScreen = new HamsterScreen(_displayHwId);
+                _hamsterScreen = new HamsterScreen(_displayHwId,_useImperial);
                 _hamsterWheel = new HamsterWheel(_pwmHwId, _diameterMM, _inactivityS, updateLiveValue, endOfExercice);
                 _hamsterWheel.runForever();
             } catch (Exception ex) {
