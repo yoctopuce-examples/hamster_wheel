@@ -12,7 +12,7 @@ namespace Yoctopuce_Hamster_Wheel
         static int Main(string[] args)
         {
             string url = "usb";
-            string pwmHwId = "";
+            string pwmHwId = "wheel";
             string displayHwId = "";
             string nextButtonHwId = "next";
             string prevButtonHwId = "prev";
@@ -80,13 +80,6 @@ namespace Yoctopuce_Hamster_Wheel
                 printUsage();
                 return 1;
             }
-
-            if (pwmHwId == "") {
-                Console.Error.WriteLine("Missing --pwmInput option");
-                printUsage();
-                return 1;
-            }
-
             var program = new HamsterController(url, pwmHwId, displayHwId, nextButtonHwId, prevButtonHwId, durationButtonHwId,resetButtonHwId,diameterMm, initactivityDelay,csvfile,useImperial);
             return program.RunForever();
         }
@@ -96,12 +89,12 @@ namespace Yoctopuce_Hamster_Wheel
             Console.Out.WriteLine("Mandatory: ");
             Console.Out.WriteLine("--diameter <diameter> ");
             Console.Out.WriteLine("	The hamster wheel diameter in mm ");
-            Console.Out.WriteLine("--pwmInput <hardwareID or logical name> ");
-            Console.Out.WriteLine("	The hardwareId or logical name of the pwmInput used to count");
-            Console.Out.WriteLine("	the wheel rotation. ");
             Console.Out.WriteLine("");
             Console.Out.WriteLine("");
             Console.Out.WriteLine("Optional:");
+            Console.Out.WriteLine("--pwmInput <hardwareID or logical name> ");
+            Console.Out.WriteLine("	The hardwareId or logical name of the pwmInput used to count");
+            Console.Out.WriteLine("	the wheel rotation. By default the application will use the pwmInput named \"wheel\".");
             Console.Out.WriteLine("--inactivity <delay>");
             Console.Out.WriteLine("	The number of second of inactivity that trigger the end of a");
             Console.Out.WriteLine("	run. By default this value is 10 seconds");

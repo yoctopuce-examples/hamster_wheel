@@ -85,6 +85,7 @@ namespace Yoctopuce_Hamster_Wheel
 
         public void Stop()
         {
+            Debug.WriteLine("stop exercice");
             _isRunning = false;
         }
 
@@ -97,6 +98,22 @@ namespace Yoctopuce_Hamster_Wheel
             ulong now = YAPI.GetTickCount();
             ulong delta = now - _lastTickCount;
             return delta < _inactivityMS;
+        }
+
+        private bool CheckExpiration()
+        {
+            if (!_isRunning)
+            {
+                return false;
+            }
+            if (_totalCount == 0)
+            {
+                return false;
+            }
+
+            ulong now = YAPI.GetTickCount();
+            ulong delta = now - _lastTickCount;
+            return delta > _inactivityMS;
         }
 
         public DateTime getStartTime()
@@ -142,9 +159,10 @@ namespace Yoctopuce_Hamster_Wheel
             while (true) {
                 YAPI.Sleep(1000, ref errmsg);
                 _liveUpdateCb(getCurrentSpeedKmh(), getDistanceM(), getDurationS(), getMaxSpeedKmh(), getAVGSpeedKmh());
-                if (getDistanceKm() > 0 && !IsRunning()) {
+                if (CheckExpiration()) {
                     _endOfExerciceCb(getStartTime(), getDurationS(), getAVGSpeedKmh(), getMaxSpeedKmh(), getDistanceM());
                     ResetRun(pwmInput.get_pulseCounter());
+                    Stop();
                 }
             }
         }
@@ -160,6 +178,7 @@ namespace Yoctopuce_Hamster_Wheel
                 // we start the run at the first magnet pass
                 ResetRun(count);
                 _isRunning = true;
+                Debug.WriteLine(String.Format("Start exeercise count = {0}", count));
                 return;
             }
 

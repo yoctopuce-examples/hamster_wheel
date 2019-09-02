@@ -172,7 +172,7 @@ namespace Yoctopuce_Hamster_Wheel
 
         private void endOfExercice(DateTime start, double duration, double avgSpeed, double maxSpeed, double distance)
         {
-            Console.Out.WriteLine("Exercise summary:[{0}] avgSpeed={1}km/h maxSpeed={2}km/h distance={3}m duration={4}s", start.ToString("u"), avgSpeed, maxSpeed, distance, duration);
+            Debug.WriteLine("Exercise summary:[{0}] avgSpeed={1}km/h maxSpeed={2}km/h distance={3}m duration={4}s", start.ToString("u"), avgSpeed, maxSpeed, distance, duration);
             _lastRun = new HamsterRun(start, duration, avgSpeed, maxSpeed, distance);
             if (_todayRun.Time.DayOfYear != _lastRun.Time.DayOfYear) {
                 _todayRun.Reset();
@@ -195,7 +195,7 @@ namespace Yoctopuce_Hamster_Wheel
                 _currenRun.MaxSpeed = maxspeed;
                 _currenRun.Duration = currentduration;
             } else {
-                Debug.WriteLine("Live: speed={0:0.00} avg={1:0.00} max={2:0.00} distance={3:0.00} duration={4:0.00}", currentspeed, avgspeed, maxspeed, currentdistance, currentduration);
+                //Debug.WriteLine("Live: speed={0:0.00} avg={1:0.00} max={2:0.00} distance={3:0.00} duration={4:0.00}", currentspeed, avgspeed, maxspeed, currentdistance, currentduration);
                 _currenRun.Distance = _lastRun.Distance;
                 _currenRun.AVGSpeed = _lastRun.AVGSpeed;
                 _currenRun.MaxSpeed = _lastRun.MaxSpeed;
