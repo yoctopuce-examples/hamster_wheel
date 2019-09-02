@@ -16,6 +16,9 @@ namespace Yoctopuce_Hamster_Wheel
             string displayHwId = "";
             string nextButtonHwId = "next";
             string prevButtonHwId = "prev";
+            string resetButtonHwId = "reset";
+            string durationButtonHwId = "duration";
+            bool useImperial = false;
             string csvfile = "";
             uint diameterMm = 0;
             uint initactivityDelay = 10;
@@ -46,8 +49,19 @@ namespace Yoctopuce_Hamster_Wheel
                     case "--prevButton":
                         prevButtonHwId = args[i + 1];
                         break;
+                    case "--resetButton":
+                        resetButtonHwId = args[i + 1];
+                        break;
+                    case "--durationButton":
+                        durationButtonHwId = args[i + 1];
+                        break;
                     case "--export_csv":
                         csvfile = args[i + 1];
+                        break;
+                    case "--unit":
+                        if (args[i + 1] == "imperial") {
+                            useImperial = true;
+                        }
                         break;
                     case "--url":
                         url = args[i + 1];
@@ -73,7 +87,7 @@ namespace Yoctopuce_Hamster_Wheel
                 return 1;
             }
 
-            var program = new HamsterController(url, pwmHwId, displayHwId, nextButtonHwId, prevButtonHwId, diameterMm, initactivityDelay,csvfile);
+            var program = new HamsterController(url, pwmHwId, displayHwId, nextButtonHwId, prevButtonHwId, durationButtonHwId,resetButtonHwId,diameterMm, initactivityDelay,csvfile,useImperial);
             return program.RunForever();
         }
 
@@ -101,6 +115,14 @@ namespace Yoctopuce_Hamster_Wheel
             Console.Out.WriteLine("--prevButton <hardwareID or logical name> ");
             Console.Out.WriteLine("	The hardwareId or logical name of the anButton used for \"prev\". By default the ");
             Console.Out.WriteLine("	application will search for the anButton function named \"prev\".");
+            Console.Out.WriteLine("--resetButton <hardwareID or logical name> ");
+            Console.Out.WriteLine("	The hardwareId or logical name of the anButton used to reset the counter. By default the ");
+            Console.Out.WriteLine("	application will search for the anButton function named \"reset\".");
+            Console.Out.WriteLine("--prevButton <hardwareID or logical name> ");
+            Console.Out.WriteLine("	The hardwareId or logical name of the anButton used to change the duration of the information displayed. By default the ");
+            Console.Out.WriteLine("	application will search for the anButton function named \"duration\".");
+            Console.Out.WriteLine("--unit <metric|imperial>");
+            Console.Out.WriteLine("	Select the unit used. By default the app use metric units.");
             Console.Out.WriteLine("--export_csv <filename>");
             Console.Out.WriteLine("	If set append all hamster run to a CSV file.");
             Console.Out.WriteLine("--url <url> ");

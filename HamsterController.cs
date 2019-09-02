@@ -13,6 +13,8 @@ namespace Yoctopuce_Hamster_Wheel
         private readonly string _displayHwId;
         private readonly string _nextButtonHwId;
         private readonly string _prevButtonHwId;
+        private readonly string _resetButtonHwId;
+        private readonly string _durButtonHwId;
         private readonly string _pwmHwId;
         private List<HamsterRunArchiver> _archivers = new List<HamsterRunArchiver>();
 
@@ -23,7 +25,7 @@ namespace Yoctopuce_Hamster_Wheel
 
         enum DisplayMode
         {
-            SPEED,
+            SPEED = 0,
             MAX_SPEED,
             AVG_SPEED,
             DISTANCE,
@@ -31,25 +33,43 @@ namespace Yoctopuce_Hamster_Wheel
             ALL
         }
 
+        enum DisplayDuration
+        {
+            LAST = 0,
+            TODAY,
+            TOTAL
+        }
+
+
         private DisplayMode _mode = DisplayMode.AVG_SPEED;
+        private DisplayDuration _displayDuration = DisplayDuration.LAST;
+        private bool _useMiles = false;
         private double _currentSpeed = 0;
         private HamsterRun _currenRun;
         private uint _inactivityS;
         private uint _diameterMM;
         private HamsterRun _lastRun;
+        private HamsterRun _todayRun;
+        private HamsterRun _totalRun;
+        private HamsterButton _hamsterDurButton;
+        private HamsterButton _hamsterResetButton;
 
-
-        public HamsterController(string url, string pwmHwId, string displayHwId, string nextButtonHwId, string prevButtonHwId, uint diameterMM, uint inactivityS, string csvfile)
+        public HamsterController(string url, string pwmHwId, string displayHwId, string nextButtonHwId, string prevButtonHwId, string durButtonHwId, string resetButtonHwId, uint diameterMM, uint inactivityS, string csvfile, bool useMiles)
         {
             _url = url;
             _nextButtonHwId = nextButtonHwId;
             _prevButtonHwId = prevButtonHwId;
+            _durButtonHwId = durButtonHwId;
+            _resetButtonHwId = resetButtonHwId;
             _pwmHwId = pwmHwId;
             _displayHwId = displayHwId;
             _currenRun = new HamsterRun();
             _diameterMM = diameterMM;
             _inactivityS = inactivityS;
+            _useMiles = useMiles;
             _lastRun = new HamsterRun();
+            _todayRun = new HamsterRun();
+            _totalRun = new HamsterRun();
             if (csvfile != "") {
                 _archivers.Add(new CSVRunArchiver(csvfile));
             }
@@ -70,9 +90,31 @@ namespace Yoctopuce_Hamster_Wheel
             }
 
             try {
-                _hamsterScreen = new HamsterScreen(_displayHwId);
                 _hamsterNextButton = new HamsterButton(_nextButtonHwId, nextButtonPressed);
+            } catch (Exception ex) {
+                Console.Error.WriteLine(String.Format("No button named \"{0}\" found. Disable \"next\" button.", _nextButtonHwId));
+            }
+
+            try {
                 _hamsterPrevButton = new HamsterButton(_prevButtonHwId, prevButtonPressed);
+            } catch (Exception ex) {
+                Console.Error.WriteLine(String.Format("No button named \"{0}\" found. Disable \"prev\" button.",_prevButtonHwId));
+            }
+
+            try {
+                _hamsterDurButton = new HamsterButton(_durButtonHwId, durButtonPressed);
+            } catch (Exception ex) {
+                Console.Error.WriteLine(String.Format("No button named \"{0}\" found. Disable \"duration\" button.", _durButtonHwId));
+            }
+
+            try {
+                _hamsterResetButton = new HamsterButton(_resetButtonHwId, resetButtonPressed);
+            } catch (Exception ex) {
+                Console.Error.WriteLine(String.Format("No button named \"{0}\" found. Disable \"reset\" button.", _resetButtonHwId));
+            }
+
+            try {
+                _hamsterScreen = new HamsterScreen(_displayHwId);
                 _hamsterWheel = new HamsterWheel(_pwmHwId, _diameterMM, _inactivityS, updateLiveValue, endOfExercice);
                 _hamsterWheel.runForever();
             } catch (Exception ex) {
@@ -87,7 +129,7 @@ namespace Yoctopuce_Hamster_Wheel
         private void nextButtonPressed(HamsterButton oject)
         {
             Debug.WriteLine(_mode.ToString() + "++");
-            if (_mode < DisplayMode.ALL) {
+            if (_mode < DisplayMode.TIME) {
                 _mode++;
             } else {
                 _mode = DisplayMode.SPEED;
@@ -102,16 +144,42 @@ namespace Yoctopuce_Hamster_Wheel
             if (_mode > DisplayMode.SPEED) {
                 _mode--;
             } else {
-                _mode = DisplayMode.ALL;
+                _mode = DisplayMode.TIME;
             }
 
             UpdateDisplay();
         }
 
+        private void durButtonPressed(HamsterButton oject)
+        {
+            Debug.WriteLine(_displayDuration.ToString() + "++");
+            if (_displayDuration < DisplayDuration.TOTAL) {
+                _displayDuration++;
+            } else {
+                _displayDuration = DisplayDuration.LAST;
+            }
+
+            UpdateDisplay();
+        }
+
+
+        private void resetButtonPressed(HamsterButton oject)
+        {
+            _totalRun.Reset();
+            UpdateDisplay();
+        }
+
+
         private void endOfExercice(DateTime start, double duration, double avgSpeed, double maxSpeed, double distance)
         {
             Console.Out.WriteLine("Exercise summary:[{0}] avgSpeed={1}km/h maxSpeed={2}km/h distance={3}m duration={4}s", start.ToString("u"), avgSpeed, maxSpeed, distance, duration);
             _lastRun = new HamsterRun(start, duration, avgSpeed, maxSpeed, distance);
+            if (_todayRun.Time.DayOfYear != _lastRun.Time.DayOfYear) {
+                _todayRun.Reset();
+            }
+
+            _todayRun.Add(_lastRun);
+            _totalRun.Add(_lastRun);
             foreach (HamsterRunArchiver archiver in _archivers) {
                 archiver.Add(_lastRun);
             }
@@ -139,25 +207,40 @@ namespace Yoctopuce_Hamster_Wheel
 
         private void UpdateDisplay()
         {
+            switch (_displayDuration) {
+                case DisplayDuration.LAST:
+                    DisplayRun("Last", _lastRun);
+                    break;
+                case DisplayDuration.TODAY:
+                    DisplayRun("Today", _todayRun);
+                    break;
+                case DisplayDuration.TOTAL:
+                    DisplayRun("Total", _totalRun);
+                    break;
+            }
+        }
+
+        private void DisplayRun(string msg, HamsterRun run)
+        {
             switch (_mode) {
                 case DisplayMode.SPEED:
-                    _hamsterScreen.DisplaySpeed("Speed", _currentSpeed);
+                    _hamsterScreen.DisplaySpeed("Speed", "", _currentSpeed);
                     break;
                 case DisplayMode.MAX_SPEED:
-                    _hamsterScreen.DisplaySpeed("Max Speed", _currenRun.MaxSpeed);
+                    _hamsterScreen.DisplaySpeed("Max Speed", msg, run.MaxSpeed);
                     break;
                 case DisplayMode.AVG_SPEED:
-                    _hamsterScreen.DisplaySpeed("Avg Speed", _currenRun.AVGSpeed);
+                    _hamsterScreen.DisplaySpeed("Avg Speed", msg, run.AVGSpeed);
                     break;
                 case DisplayMode.DISTANCE:
-                    _hamsterScreen.DisplayDistance("Distance", _currenRun.Distance);
+                    _hamsterScreen.DisplayDistance("Distance", msg, run.Distance);
                     break;
                 case DisplayMode.TIME:
-                    _hamsterScreen.DisplayDuration("Duration", _currenRun.Duration);
+                    _hamsterScreen.DisplayDuration("Duration", msg, run.Duration);
                     break;
                 case DisplayMode.ALL:
                 default:
-                    _hamsterScreen.DisplayFull(_currentSpeed, _currenRun.Distance, _currenRun.Duration, _currenRun.MaxSpeed, _currenRun.AVGSpeed, "km/h", "s", "km");
+                    _hamsterScreen.DisplayFull(_currentSpeed, run.Distance, run.Duration, run.MaxSpeed, run.AVGSpeed, "km/h", "s", "km");
                     break;
             }
         }

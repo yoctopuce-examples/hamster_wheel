@@ -33,7 +33,9 @@ Create a file named ``hamsterwheel.service`` in the ``/etc/systemd/system/`` dir
 Description=Yoctopuce Hamster Wheel
 [Service]
 Type=simple
-ExecStart=/home/pi/hamster_wheel_pi/Hamster --diameter 150
+WorkingDirectory=/home/pi/hamster_wheel_pi
+ExecStart=/home/pi/hamster_wheel_pi/HamsterWheel --diameter 150 --pwmInput YPWMRX01-874FE.pwmInput1 --url 172.17.17.97
+Restart=on-failure
 [Install]
 WantedBy=multi-user.target
 ```

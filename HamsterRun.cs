@@ -24,5 +24,26 @@ namespace Yoctopuce_Hamster_Wheel
         public HamsterRun()
         {
         }
+
+        public void Add(HamsterRun newRun)
+        {
+            if (newRun.MaxSpeed > MaxSpeed) {
+                MaxSpeed = newRun.MaxSpeed;
+            }
+
+            Distance += newRun.Distance;
+            Duration += newRun.Duration;
+
+            AVGSpeed = 3.6 * Distance / Duration;
+        }
+
+        public void Reset()
+        {
+            AVGSpeed = 0;
+            MaxSpeed = 0;
+            Distance = 0;
+            Time = DateTime.Now;
+            Duration = 0;
+        }
     }
 }

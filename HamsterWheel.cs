@@ -194,8 +194,9 @@ namespace Yoctopuce_Hamster_Wheel
 
             // Set debounce value to 5 ms
             pwmInput.set_debouncePeriod(5);
-            pwmInput.set_pwmReportMode(YPwmInput.PWMREPORTMODE_PWM_PULSECOUNT);
+            pwmInput.set_pwmReportMode(YPwmInput.PWMREPORTMODE_PWM_PULSECOUNT);            
             pwmInput.set_logFrequency("1/m");
+            pwmInput.get_module().saveToFlash();
             YDataLogger dataLogger = pwmInput.get_dataLogger();
             dataLogger.set_autoStart(YDataLogger.AUTOSTART_ON);
             dataLogger.set_recording(YDataLogger.RECORDING_ON);
