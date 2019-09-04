@@ -97,7 +97,7 @@ namespace Yoctopuce_Hamster_Wheel
                 _bgLayer.selectFont("Small.yfm");
                 _bgLayer.drawText(2, 2, YDisplayLayer.ALIGN.TOP_LEFT, label);
                 if (labe2 != "") {
-                    _bgLayer.drawText(_w - 2, 2, YDisplayLayer.ALIGN.TOP_LEFT, labe2);
+                    _bgLayer.drawText(_w - 2, 2, YDisplayLayer.ALIGN.TOP_RIGHT, labe2);
                 }
 
                 _bgLayer.selectFont("Medium.yfm");
